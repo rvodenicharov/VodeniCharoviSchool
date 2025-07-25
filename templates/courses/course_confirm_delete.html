@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Потвърди изтриване на курс{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Изтриване на курс</h2>
+    <div class="alert alert-danger" role="alert">
+        Сигурни ли сте, че искате да изтриете курс: <strong>"{{ course.title }}"</strong>?
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger mt-3 me-2">Потвърди изтриване</button>
+        <a href="{% url 'course_detail' pk=course.pk %}" class="btn btn-secondary mt-3">Отказ</a>
+    </form>
+{% endblock %}

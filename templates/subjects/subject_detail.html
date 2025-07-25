@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Детайли за предмет: {{ subject.name }}{% endblock %}
+
+{% block content %}
+    <a href="{% url 'subject_list' %}" class="btn btn-secondary mb-3">← Обратно към списъка с предмети</a>
+    <h2 class="mb-4">{{ subject.name }}</h2>
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            {% if subject.image %}
+                <img src="{{ subject.image.url }}" alt="{{ subject.name }}" class="img-fluid rounded mb-3" style="max-width: 200px;">
+            {% endif %}
+            <p class="card-text"><strong>Описание:</strong> {{ subject.description }}</p>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Преподаватели по този предмет:</h3>
+    {% if subject.teachers.all %}
+        <ul class="list-group mb-3">
+            {% for teacher in subject.teachers.all %}
+                <li class="list-group-item"><a href="{% url 'teacher_detail' pk=teacher.pk %}">{{ teacher.first_name }} {{ teacher.last_name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Няма асоциирани преподаватели с този предмет.</p>
+    {% endif %}
+
+    <h3 class="mt-4">Курсове по този предмет:</h3>
+    {% if courses_for_subject %}
+        <ul class="list-group mb-3">
+            {% for course in courses_for_subject %}
+                <li class="list-group-item"><a href="{% url 'course_detail' pk=course.pk %}">{{ course.title }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Няма асоциирани курсове с този предмет.</p>
+    {% endif %}
+
+    <div class="mt-4">
+        {% if perms.subjects.change_subject %}
+            <a href="{% url 'subject_update' pk=subject.pk %}" class="btn btn-warning me-2">Редактирай</a>
+        {% endif %}
+        {% if perms.subjects.delete_subject %}
+            <a href="{% url 'subject_delete' pk=subject.pk %}" class="btn btn-danger">Изтрий</a>
+        {% endif %}
+    </div>
+{% endblock %}

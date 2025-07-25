@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Начало{% endblock %}
+
+{% block content %}
+    <section class="hero-section text-white text-center py-5 mb-5">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-4">Добре дошли в Школа Воденичарови!</h1>
+            <p class="lead mb-5">Открийте пътя към знанието с нашите опитни преподаватели и разнообразни курсове.</p>
+            <a href="{% url 'course_list' %}" class="btn btn-primary btn-lg me-3">Разгледайте курсове</a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'register_user' %}" class="btn btn-outline-light btn-lg">Запишете се сега</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="container my-5">
+        <h2 class="text-center mb-5">Защо да изберете нас?</h2>
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Опитни Преподаватели</h3>
+                        <p class="card-text">Нашите учители са експерти в своите области, посветени на вашия успех.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Разнообразни Курсове</h3>
+                        <p class="card-text">Предлагаме широк спектър от предмети, отговарящи на всяка нужда.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Персонализиран Подход</h3>
+                        <p class="card-text">Индивидуално внимание за всеки ученик, съобразено с неговите нужди.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container my-5">
+        <h2 class="text-center mb-5">Нашата атмосфера</h2>
+        <div id="carouselExampleIndicators" class="carousel slide shadow-lg rounded-3" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner rounded-3">
+                <div class="carousel-item active">
+                    <img src="{% static 'img/carousel1.jpg' %}" class="d-block w-100" alt="Учебна среда 1">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-2">
+                        <h5>Модерни класни стаи</h5>
+                        <p>Учете в комфортна и стимулираща среда.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{% static 'img/carousel2.jpg' %}" class="d-block w-100" alt="Учебна среда 2">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-2">
+                        <h5>Интерактивно обучение</h5>
+                        <p>Практически уроци, които правят ученето забавно.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{% static 'img/carousel3.jpg' %}" class="d-block w-100" alt="Учебна среда 3">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-2">
+                        <h5>Посветени преподаватели</h5>
+                        <p>Нашите учители са тук, за да ви подкрепят.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Предишен</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Следващ</span>
+            </button>
+        </div>
+    </section>
+{% endblock %}

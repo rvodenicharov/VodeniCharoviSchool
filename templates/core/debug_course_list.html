@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ page_title }}</h2>
+
+    {% if courses %}
+        <p>Намерени курсове:</p>
+        <ul>
+            {% for course in courses %}
+                <li>{{ course.id }}: {{ course.title }} (Предмет: {{ course.subject.name }}, Преподавател: {{ course.teacher.first_name }} {{ course.teacher.last_name }})</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Няма намерени курсове в базата данни!</p>
+    {% endif %}
+
+    <p><a href="{% url 'enrollment_create' %}">Отиди на форма за записване</a></p>
+{% endblock %}

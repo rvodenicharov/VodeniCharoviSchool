@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Нашите Предмети{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Нашите Предмети</h2>
+
+    <form class="d-flex mb-4" role="search" method="get">
+        <input class="form-control me-2" type="search" placeholder="Търсене на предмети..." aria-label="Search" name="q" value="{{ query }}">
+        <button class="btn btn-outline-primary" type="submit">Търси</button>
+    </form>
+
+    {% if perms.subjects.add_subject %}
+        <p><a href="{% url 'subject_create' %}" class="btn btn-success mb-3">Добави нов предмет</a></p>
+    {% endif %}
+
+    {% if subjects %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for subject in subjects %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            {% if subject.image %}
+                                <img src="{{ subject.image.url }}" alt="{{ subject.name }}" class="card-img-top rounded mx-auto mb-3" style="max-width: 150px; height: auto;">
+                            {% else %}
+                                <div class="text-center mb-3"></div>
+                            {% endif %}
+                            <h5 class="card-title text-center"><a href="{% url 'subject_detail' pk=subject.pk %}" class="text-decoration-none text-primary">{{ subject.name }}</a></h5>
+                            <p class="card-text flex-grow-1">{{ subject.description|truncatechars:150 }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Предишна</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Предишна</span></li>
+                    {% endif %}
+
+                    {% for i in page_obj.paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Следваща</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Следваща</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <p>Няма намерени предмети, отговарящи на търсенето.</p>
+        {% if perms.subjects.add_subject %}
+            <p><a href="{% url 'subject_create' %}" class="btn btn-primary">Добавете първия!</a></p>
+        {% endif %}
+    {% endif %}
+
+    <p class="mt-4"><a href="{% url 'index' %}" class="btn btn-secondary">← Обратно към началната страница</a></p>
+{% endblock %}

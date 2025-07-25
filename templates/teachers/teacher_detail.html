@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Детайли за преподавател: {{ teacher.first_name }} {{ teacher.last_name }}{% endblock %}
+
+{% block content %}
+    <a href="{% url 'teacher_list' %}" class="btn btn-secondary mb-3">← Обратно към списъка с преподаватели</a>
+    <h2 class="mb-4">{{ teacher.first_name }} {{ teacher.last_name }}</h2>
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    {% if teacher.profile_picture %}
+                        <img src="{{ teacher.profile_picture.url }}" alt="{{ teacher.first_name }} {{ teacher.last_name }}" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="currentColor" class="bi bi-person-circle text-muted mb-3" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                        </svg>
+                    {% endif %}
+                </div>
+                <div class="col-md-9">
+                    <p class="card-text"><strong>Имейл:</strong> {{ teacher.email }}</p>
+                    <p class="card-text"><strong>Биография:</strong> {{ teacher.bio }}</p>
+                    <p class="card-text"><strong>Преподава:</strong>
+                        {% for subject in teacher.subjects.all %}
+                            {{ subject.name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            Няма посочени предмети.
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Курсове, водени от този преподавател:</h3>
+    {% if courses_by_teacher %}
+        <div class="list-group">
+            {% for course in courses_by_teacher %}
+                <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 shadow-sm rounded">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1"><a href="{% url 'course_detail' pk=course.pk %}" class="text-decoration-none text-primary">{{ course.title }}</a></h5>
+                        <small class="text-muted">Предмет: {{ course.subject.name }}</small>
+                    </div>
+                    <p class="mb-1">Начална дата: {{ course.start_date|date:"d.m.Y" }}</p>
+                    <p class="fw-bold">Цена: {{ course.price }} лв.</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Няма асоциирани курсове с този преподавател.</p>
+    {% endif %}
+
+    <div class="mt-4">
+        {% if perms.teachers.change_teacher %}
+            <a href="{% url 'teacher_update' pk=teacher.pk %}" class="btn btn-warning me-2">Редактирай</a>
+        {% endif %}
+        {% if perms.teachers.delete_teacher %}
+            <a href="{% url 'teacher_delete' pk=teacher.pk %}" class="btn btn-danger">Изтрий</a>
+        {% endif %}
+    </div>
+{% endblock %}

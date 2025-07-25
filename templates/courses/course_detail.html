@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Детайли за {{ course.title }}{% endblock %}
+
+{% block content %}
+    <a href="{% url 'course_list' %}" class="btn btn-secondary mb-3">← Обратно към списъка с курсове</a>
+    <h2 class="mb-4">{{ course.title }}</h2>
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="card-text"><strong>Предмет:</strong> <a href="{% url 'subject_detail' pk=course.subject.pk %}" class="text-decoration-none">{{ course.subject.name }}</a></p>
+            <p class="card-text"><strong>Преподавател:</strong> <a href="{% url 'teacher_detail' pk=course.teacher.pk %}" class="text-decoration-none">{{ course.teacher.first_name }} {{ course.teacher.last_name }}</a></p>
+            <p class="card-text"><strong>Описание:</strong> {{ course.description }}</p>
+            <p class="card-text"><strong>Цена:</strong> {{ course.price }} лв.</p>
+            <p class="card-text"><strong>Начална дата:</strong> {{ course.start_date|date:"d.m.Y" }}</p>
+            <p class="card-text"><strong>Крайна дата:</strong> {{ course.end_date|date:"d.m.Y" }}</p>
+            <p class="card-text"><strong>Макс. брой студенти:</strong> {{ course.max_students }}</p>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Записани студенти:</h3>
+    {% if course.enrollments.all %}
+        <ul class="list-group mb-3">
+            {% for enrollment in course.enrollments.all %}
+                <li class="list-group-item">
+                    {{ enrollment.student.username }}
+                    {% if enrollment.completed %}
+                        <span class="badge bg-success ms-2">Завършен</span>
+                    {% else %}
+                        <span class="badge bg-info ms-2">Активен</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Няма записани студенти за този курс.</p>
+    {% endif %}
+
+    <div class="mt-4">
+        {% if user.is_authenticated and not user.is_staff %}
+            {% if is_enrolled %}
+                <form action="{% url 'enrollment_delete_from_course' course_pk=course.pk %}" method="post" class="d-inline me-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Отпиши се от курса</button>
+                </form>
+            {% else %}
+                <form action="{% url 'enrollment_create_from_course' course_pk=course.pk %}" method="post" class="d-inline me-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Запиши се за курса</button>
+                </form>
+            {% endif %}
+        {% endif %}
+
+        {% if perms.courses.change_course %}
+            <a href="{% url 'course_update' pk=course.pk %}" class="btn btn-warning me-2">Редактирай курс</a>
+        {% endif %}
+        {% if perms.courses.delete_course %}
+            <a href="{% url 'course_delete' pk=course.pk %}" class="btn btn-danger">Изтрий курс</a>
+        {% endif %}
+    </div>
+{% endblock %}

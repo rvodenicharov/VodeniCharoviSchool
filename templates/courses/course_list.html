@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Списък с курсове{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Списък с курсове</h2>
+
+    <form class="mb-4" role="search" method="get">
+        <div class="d-flex mb-3">
+            <input class="form-control me-2" type="search" placeholder="Търсене на курсове..." aria-label="Search" name="q" value="{{ query }}">
+            <button class="btn btn-outline-primary" type="submit">Търси</button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="subjectFilter" class="form-label visually-hidden">Филтрирай по предмет</label>
+                <select class="form-select" id="subjectFilter" name="subject" onchange="this.form.submit()">
+                    <option value="">-- Филтрирай по предмет --</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if selected_subject|stringformat:"s" == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="teacherFilter" class="form-label visually-hidden">Филтрирай по преподавател</label>
+                <select class="form-select" id="teacherFilter" name="teacher" onchange="this.form.submit()">
+                    <option value="">-- Филтрирай по преподавател --</option>
+                    {% for teacher in teachers %}
+                        <option value="{{ teacher.id }}" {% if selected_teacher|stringformat:"s" == teacher.id|stringformat:"s" %}selected{% endif %}>{{ teacher.first_name }} {{ teacher.last_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+    </form>
+
+    {% if perms.courses.add_course %}
+        <p><a href="{% url 'course_create' %}" class="btn btn-success mb-3">Създай нов курс</a></p>
+    {% endif %}
+
+    {% if courses %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for course in courses %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title"><a href="{% url 'course_detail' pk=course.pk %}" class="text-decoration-none text-primary">{{ course.title }}</a></h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ course.subject.name }}</h6>
+                            <p class="card-text">Преподавател: {{ course.teacher.first_name }} {{ course.teacher.last_name }}</p>
+                            <p class="card-text"><small class="text-muted">Начална дата: {{ course.start_date|date:"d.m.Y" }}</small></p>
+                            <p class="card-text fw-bold mt-auto">Цена: {{ course.price }} лв.</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_teacher %}&teacher={{ selected_teacher }}{% endif %}">Предишна</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Предишна</span></li>
+                    {% endif %}
+
+                    {% for i in page_obj.paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_teacher %}&teacher={{ selected_teacher }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_teacher %}&teacher={{ selected_teacher }}{% endif %}">Следваща</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Следваща</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <p>Няма намерени курсове, отговарящи на търсенето или филтрите.</p>
+        {% if perms.courses.add_course %}
+            <p><a href="{% url 'course_create' %}" class="btn btn-primary">Създайте първия!</a></p>
+        {% endif %}
+    {% endif %}
+
+    <p class="mt-4"><a href="{% url 'index' %}" class="btn btn-secondary">← Обратно към началната страница</a></p>
+{% endblock %}

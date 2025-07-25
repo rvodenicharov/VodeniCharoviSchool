@@ -1,0 +1,14 @@
+    {% extends 'base.html' %}
+
+    {% block title %}Вътрешна сървърна грешка (500){% endblock %}
+
+    {% block content %}
+        <div class="text-center my-5">
+            <h1 class="display-1 text-danger">500</h1>
+            <h2 class="mb-4">Вътрешна сървърна грешка</h2>
+            <p class="lead">Извиняваме се за неудобството. Възникна неочаквана грешка на сървъра.</p>
+            <p>Моля, опитайте отново по-късно или се свържете с поддръжката.</p>
+            <a href="{% url 'index' %}" class="btn btn-primary mt-3">Върнете се на началната страница</a>
+        </div>
+    {% endblock %}
+    

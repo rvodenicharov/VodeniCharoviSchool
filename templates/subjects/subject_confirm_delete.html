@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Потвърди изтриване на предмет{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Изтриване на предмет</h2>
+    <div class="alert alert-danger" role="alert">
+        Сигурни ли сте, че искате да изтриете предмет: <strong>"{{ subject.name }}"</strong>?
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger mt-3 me-2">Потвърди изтриване</button>
+        <a href="{% url 'subject_detail' pk=subject.pk %}" class="btn btn-secondary mt-3">Отказ</a>
+    </form>
+{% endblock %}
