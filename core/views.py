@@ -1,23 +1,28 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import (
-    CreateView, ListView, DetailView, UpdateView, DeleteView, TemplateView
-)
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
-)
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Q
+from django.utils import timezone
 from .forms import UserRegisterForm, EnrollmentForm, UserProfileForm
-from .models import Enrollment, Profile
+from .models import Profile, Enrollment
+from subjects.models import Subject
+from teachers.models import Teacher
 from courses.models import Course
+from django.db import IntegrityError, transaction
 
 def index(request):
-    return render(request, 'core/index.html', {
-        'page_title': 'Начална страница на Школа Воденичарови',
-        'welcome_message': 'Добре дошли в Школа Воденичарови! Разгледайте нашите предмети и преподаватели.',
-    })
+    return render(request, 'core/index.html')
+
+def about_us(request):
+    return render(request, 'core/about.html')
+
+def contact_us(request):
+    return render(request, 'core/contact.html')
 
 class UserRegisterView(CreateView):
     template_name = 'core/register.html'
@@ -25,9 +30,8 @@ class UserRegisterView(CreateView):
     success_url = reverse_lazy('login_user')
 
     def form_valid(self, form):
-        response = super().form_valid(form)
         messages.success(self.request, 'Успешна регистрация! Моля, влезте.')
-        return response
+        return super().form_valid(form)
 
 class UserLoginView(LoginView):
     template_name = 'core/login.html'
@@ -42,13 +46,13 @@ class UserProfileView(LoginRequiredMixin, DetailView):
     context_object_name = 'profile'
 
     def get_object(self, queryset=None):
-        return Profile.objects.get_or_create(user=self.request.user)[0]
+        return self.request.user.profile
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['enrollments'] = Enrollment.objects.filter(
-            student=self.request.user
-        ).order_by('-enrollment_date')
+        user = self.request.user
+        context['user'] = user
+        context['enrollments'] = Enrollment.objects.filter(student=user).select_related('course').order_by('-enrollment_date')
         return context
 
 class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -56,48 +60,35 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
     form_class = UserProfileForm
     template_name = 'core/user_profile_form.html'
     success_url = reverse_lazy('user_profile')
-    context_object_name = 'profile'
 
     def get_object(self, queryset=None):
-        return Profile.objects.get_or_create(user=self.request.user)[0]
+        return self.request.user.profile
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form_title'] = 'Редактиране на профил'
         return context
 
-@login_required
-def enrollment_create_from_course(request, course_pk):
-    if request.method == 'POST':
-        course = get_object_or_404(Course, pk=course_pk)
-        if Enrollment.objects.filter(student=request.user, course=course).exists():
-            messages.warning(request, f'Вече сте записани за курса "{course.title}".')
-        elif course.max_students and course.enrollments.count() >= course.max_students:
-            messages.error(request, f'Курсът "{course.title}" е пълен.')
-        else:
-            Enrollment.objects.create(student=request.user, course=course)
-            messages.success(request, f'Успешно се записахте за курса "{course.title}".')
-        return redirect('course_detail', pk=course_pk)
-    return redirect('course_list')
-
-@login_required
-def enrollment_delete_from_course(request, course_pk):
-    if request.method == 'POST':
-        course = get_object_or_404(Course, pk=course_pk)
-        try:
-            enrollment = Enrollment.objects.get(student=request.user, course=course)
-            enrollment.delete()
-            messages.success(request, f'Успешно се отписахте от курса "{course.title}".')
-        except Enrollment.DoesNotExist:
-            messages.error(request, f'Не сте записани за курса "{course.title}".')
-        return redirect('course_detail', pk=course_pk)
-    return redirect('course_list')
-
 class EnrollmentListView(LoginRequiredMixin, ListView):
     model = Enrollment
     template_name = 'core/enrollment_list.html'
     context_object_name = 'enrollments'
-    ordering = ['-enrollment_date']
+    paginate_by = 10
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Enrollment.objects.all().select_related('student', 'course', 'course__subject', 'course__teacher').order_by('-enrollment_date')
+        return Enrollment.objects.filter(student=self.request.user).select_related('course', 'course__subject', 'course__teacher').order_by('-enrollment_date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q', '')
+        return context
+
+class EnrollmentDetailView(LoginRequiredMixin, DetailView):
+    model = Enrollment
+    template_name = 'core/enrollment_detail.html'
+    context_object_name = 'enrollment'
 
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -112,21 +103,14 @@ class EnrollmentCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.student = self.request.user
+        form.instance.enrollment_date = timezone.now()
+        messages.success(self.request, 'Успешно се записахте за курса!')
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Записване за курс'
+        context['form_title'] = 'Записване за нов курс'
         return context
-
-class EnrollmentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    model = Enrollment
-    template_name = 'core/enrollment_detail.html'
-    context_object_name = 'enrollment'
-
-    def test_func(self):
-        enrollment = self.get_object()
-        return self.request.user.is_staff or enrollment.student == self.request.user
 
 class EnrollmentUpdateView(PermissionRequiredMixin, UpdateView):
     model = Enrollment
@@ -151,14 +135,33 @@ class EnrollmentDeleteView(PermissionRequiredMixin, DeleteView):
         context['enrollment'] = self.get_object()
         return context
 
-def page_not_found_view(request, exception):
-    return render(request, '404.html', status=404)
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'core/dashboard.html'
 
-def server_error_view(request):
-    return render(request, '500.html', status=500)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['profile'] = user.profile if hasattr(user, 'profile') else None
+        context['enrolled_courses'] = Enrollment.objects.filter(student=user).select_related('course').order_by('-enrollment_date')
+        return context
 
-class AboutView(TemplateView):
-    template_name = 'core/about.html'
+@login_required
+@require_POST
+def enroll_in_course(request, course_pk):
+    course = get_object_or_404(Course, pk=course_pk)
+    try:
+        with transaction.atomic():
+            Enrollment.objects.create(student=request.user, course=course, enrollment_date=timezone.now())
+            messages.success(request, f'Успешно се записахте за курса "{course.title}"!')
+    except IntegrityError:
+        messages.warning(request, f'Вече сте записани за курса "{course.title}".')
+    return redirect('course_detail', pk=course_pk)
 
-class ContactView(TemplateView):
-    template_name = 'core/contact.html'
+@login_required
+@require_POST
+def unenroll_from_course(request, enrollment_pk):
+    enrollment = get_object_or_404(Enrollment, pk=enrollment_pk, student=request.user)
+    course_title = enrollment.course.title
+    enrollment.delete()
+    messages.success(request, f'Успешно се отписахте от курса "{course_title}".')
+    return redirect('course_detail', pk=enrollment.course.pk)

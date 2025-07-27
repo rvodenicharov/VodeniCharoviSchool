@@ -38,12 +38,12 @@
     <div class="mt-4">
         {% if user.is_authenticated and not user.is_staff %}
             {% if is_enrolled %}
-                <form action="{% url 'enrollment_delete_from_course' course_pk=course.pk %}" method="post" class="d-inline me-2">
+                <form action="{% url 'unenroll_from_course' enrollment_pk=enrollment_obj.pk %}" method="post" class="d-inline me-2">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Отпиши се от курса</button>
                 </form>
             {% else %}
-                <form action="{% url 'enrollment_create_from_course' course_pk=course.pk %}" method="post" class="d-inline me-2">
+                <form action="{% url 'enroll_in_course' course_pk=course.pk %}" method="post" class="d-inline me-2">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary">Запиши се за курса</button>
                 </form>
@@ -51,10 +51,10 @@
         {% endif %}
 
         {% if perms.courses.change_course %}
-            <a href="{% url 'course_update' pk=course.pk %}" class="btn btn-warning me-2">Редактирай курс</a>
+            <a href="{% url 'course_update' pk=course.pk %}" class="btn btn-warning me-2">Редактирай</a>
         {% endif %}
         {% if perms.courses.delete_course %}
-            <a href="{% url 'course_delete' pk=course.pk %}" class="btn btn-danger">Изтрий курс</a>
+            <a href="{% url 'course_delete' pk=course.pk %}" class="btn btn-danger">Изтрий</a>
         {% endif %}
     </div>
 {% endblock %}

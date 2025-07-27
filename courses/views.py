@@ -68,10 +68,17 @@ class CourseDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         course = self.get_object()
 
+        is_enrolled = False
+        enrollment_obj = None
         if self.request.user.is_authenticated:
-            context['is_enrolled'] = Enrollment.objects.filter(student=self.request.user, course=course).exists()
-        else:
-            context['is_enrolled'] = False
+            try:
+                enrollment_obj = Enrollment.objects.get(student=self.request.user, course=course)
+                is_enrolled = True
+            except Enrollment.DoesNotExist:
+                is_enrolled = False
+
+        context['is_enrolled'] = is_enrolled
+        context['enrollment_obj'] = enrollment_obj
 
         return context
 

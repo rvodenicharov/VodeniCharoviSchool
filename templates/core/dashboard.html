@@ -1,0 +1,72 @@
+    {% extends 'base.html' %}
+    {% load static %}
+
+    {% block title %}Моето табло{% endblock %}
+
+    {% block content %}
+        <h2 class="mb-4">Здравейте, {{ user.username }}! Добре дошли в Моето табло.</h2>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Вашата информация</h4>
+                        <div class="d-flex align-items-center mb-3">
+                            {% if profile and profile.profile_picture %}
+                                <img src="{{ profile.profile_picture.url }}" alt="Профилна снимка" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-person-circle text-muted me-3" viewBox="0 0 16 16">
+                                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                                </svg>
+                            {% endif %}
+                            <div>
+                                <p class="mb-0"><strong>Потребителско име:</strong> {{ user.username }}</p>
+                                <p class="mb-0"><strong>Имейл:</strong> {{ user.email }}</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'user_profile' %}" class="btn btn-outline-primary btn-sm">Виж пълен профил</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Вашите записани курсове</h4>
+                        {% if enrolled_courses %}
+                            <ul class="list-group list-group-flush">
+                                {% for enrollment in enrolled_courses %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <a href="{% url 'course_detail' pk=enrollment.course.pk %}" class="text-decoration-none">{{ enrollment.course.title }}</a>
+                                        {% if enrollment.completed %}
+                                            <span class="badge bg-success">Завършен</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Активен</span>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <a href="{% url 'enrollment_list' %}" class="btn btn-outline-primary btn-sm mt-3">Виж всички записвания</a>
+                        {% else %}
+                            <p>Все още нямате записани курсове.</p>
+                            <a href="{% url 'course_list' %}" class="btn btn-primary btn-sm">Разгледайте курсове</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title">Предстоящи събития/новини</h4>
+                        <p>Тук може да има новини или предстоящи събития.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endblock %}
+    

@@ -13,13 +13,6 @@ class UserRegisterForm(UserCreationForm):
         model = UserModel
         fields = UserCreationForm.Meta.fields + ('email',)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields.get('password', forms.CharField()).help_text = None
-        self.fields.get('password2', forms.CharField()).help_text = None
-        for field in self.fields.values():
-            field.widget.attrs['class'] = 'form-control'
-
     def save(self, commit=True):
         user = super().save(commit=False)
         if commit:
