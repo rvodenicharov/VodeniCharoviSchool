@@ -25,7 +25,7 @@ body {
 }
 
 .school-logo {
-    height: 60px;
+    height: 70px;
     width: auto;
     border-radius: 50%;
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
@@ -85,14 +85,65 @@ body {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
+.main-navbar .nav-item button.nav-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+}
+
+main {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    border: 1px solid #ced4da;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 0.25rem rgba(0, 86, 179, 0.25);
+}
+
 .btn-primary {
     background-color: #007bff;
     border-color: #007bff;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .btn-primary:hover {
     background-color: #0056b3;
     border-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.alert {
+    border-radius: 0.5rem;
+}
+
+.profile-actions .btn {
+    margin-right: 10px;
 }
 
 .card {
@@ -182,73 +233,4 @@ body {
 
 .carousel-caption p {
     font-size: 1.1rem;
-}
-
-@media (max-width: 991.98px) {
-    .main-header {
-        flex-direction: column;
-        padding: 1rem 0;
-    }
-    .main-header .container {
-        flex-direction: column;
-        text-align: center;
-    }
-    .school-logo {
-        margin-bottom: 10px;
-        margin-right: 0;
-    }
-    .header-title {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-    }
-    .header-datetime {
-        font-size: 0.9rem;
-        min-width: unset;
-        text-align: center;
-    }
-    .main-navbar .navbar-nav {
-        text-align: center;
-    }
-    .main-navbar .nav-item {
-        margin-bottom: 0.5rem;
-    }
-    .hero-section {
-        min-height: 400px;
-        padding: 3rem 1rem;
-    }
-    .hero-section h1 {
-        font-size: 2.5rem;
-    }
-    .hero-section p.lead {
-        font-size: 1.2rem;
-    }
-    .hero-section .btn {
-        display: block;
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-    .hero-section .btn:last-child {
-        margin-bottom: 0;
-    }
-    .carousel-item img {
-        height: 300px;
-    }
-    .carousel-caption {
-        padding: 0.5rem;
-    }
-    .carousel-caption h5 {
-        font-size: 1.2rem;
-    }
-    .carousel-caption p {
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 767.98px) {
-    .header-title {
-        font-size: 1.8rem;
-    }
-    .school-logo {
-        height: 50px;
-    }
 }

@@ -1,61 +1,77 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Моят Профил{% endblock %}
 
 {% block content %}
+<div class="container mt-4 mb-5">
     <h2 class="mb-4">Моят Профил</h2>
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title">Потребителско име: {{ user.username }}</h5>
-            <p class="card-text"><strong>Имейл:</strong> {{ user.email }}</p>
-            {% if profile %}
-                <p class="card-text"><strong>Телефон:</strong> {% if profile.phone_number %}{{ profile.phone_number }}{% else %}Не е посочен{% endif %}</p>
-                <p class="card-text"><strong>Адрес:</strong> {% if profile.address %}{{ profile.address }}{% else %}Не е посочен{% endif %}</p>
-                <p class="card-text"><strong>Дата на раждане:</strong> {% if profile.date_of_birth %}{{ profile.date_of_birth|date:"d.m.Y" }}{% else %}Не е посочена{% endif %}</p>
-                {% if profile.profile_picture %}
-                    <p class="card-text">
-                        <strong>Профилна снимка:</strong><br>
-                        <img src="{{ profile.profile_picture.url }}" alt="Профилна снимка" class="img-fluid rounded-circle mt-2" style="max-width: 150px; height: 150px; object-fit: cover;">
-                    </p>
-                {% endif %}
+    <div class="card p-4 shadow-sm">
+        <p><strong>Потребителско име:</strong> {{ user.username }}</p>
+        <p><strong>Имейл:</strong> {{ user.email }}</p>
+        {% if profile %}
+            <p><strong>Телефон:</strong> {{ profile.phone_number|default:"Няма добавен" }}</p>
+            <p><strong>Адрес:</strong> {{ profile.address|default:"Няма добавен" }}</p>
+            <p><strong>Дата на раждане:</strong> {{ profile.date_of_birth|default:"Няма добавена" }}</p>
+            <p><strong>Профилна снимка:</strong></p>
+            {% if profile.profile_picture %}
+                <img src="{{ profile.profile_picture.url }}" alt="Профилна снимка" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
             {% else %}
-                <p class="card-text">Няма информация за профила. Моля, редактирайте профила си, за да добавите данни.</p>
+                <img src="{% static 'img/default_profile.png' %}" alt="Без профилна снимка" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
             {% endif %}
-            <a href="{% url 'user_profile_update' %}" class="btn btn-primary mt-3 me-2">Редактирай Профил</a>
-            <form action="{% url 'logout_user' %}" method="post" class="d-inline mt-3">
+        {% else %}
+            <p>Няма наличен профил.</p>
+        {% endif %}
+
+        <div class="d-flex mt-3"> {# Added this flex container for buttons #}
+            <a href="{% url 'user_profile_update' %}" class="btn btn-primary me-2">Редактирай Профил</a>
+            <form action="{% url 'logout_user' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Изход</button>
             </form>
         </div>
+
     </div>
 
-    <h3 class="mt-4">Моите Записвания:</h3>
+    <h3 class="mt-5 mb-3">Моите Записвания:</h3>
     {% if enrollments %}
-        <div class="list-group">
-            {% for enrollment in enrollments %}
-                <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 shadow-sm rounded">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1"><a href="{% url 'enrollment_detail' pk=enrollment.pk %}" class="text-decoration-none text-primary">{{ enrollment.course.title }}</a></h5>
-                        <small class="text-muted">Записан на: {{ enrollment.enrollment_date|date:"d.m.Y" }}</small>
-                    </div>
-                    <p class="mb-1">Преподавател: {{ enrollment.course.teacher.first_name }} {{ enrollment.course.teacher.last_name }}</p>
-                    <p class="mb-1">Статус: {% if enrollment.completed %}<span class="badge bg-success">Завършен</span>{% else %}<span class="badge bg-info">Активен</span>{% endif %}</p>
-                    {% if user.is_staff %}
-                        <p class="card-text">Студент: {{ enrollment.student.username }}</p>
-                        <div class="mt-2">
-                            <a href="{% url 'enrollment_update' pk=enrollment.pk %}" class="btn btn-sm btn-warning me-2">Редактирай</a>
-                            <a href="{% url 'enrollment_delete' pk=enrollment.pk %}" class="btn btn-sm btn-danger">Изтрий</a>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Курс</th>
+                        <th>Преподавател</th>
+                        <th>Дата на записване</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                        <tr>
+                            <td><a href="{% url 'courses:course_detail' pk=enrollment.course.pk %}">{{ enrollment.course.title }}</a></td>
+                            <td>{{ enrollment.course.teacher.full_name }}</td>
+                            <td>{{ enrollment.enrollment_date|date:"d.m.Y" }}</td>
+                            <td>
+                                {% if enrollment.completed %}
+                                    <span class="badge bg-success">Завършен</span>
+                                {% else %}
+                                    <span class="badge bg-info">В процес</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{% url 'unenroll_from_course' enrollment.pk %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-warning">Отпиши се</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
         <p>Все още нямате записвания за курсове.</p>
-        {% if user.is_authenticated %}
-            <p><a href="{% url 'enrollment_create' %}" class="btn btn-primary">Запишете се за първия си курс!</a></p>
-        {% endif %}
     {% endif %}
-
-    <p class="mt-4"><a href="{% url 'index' %}" class="btn btn-secondary">← Обратно към началната страница</a></p>
+</div>
 {% endblock %}
