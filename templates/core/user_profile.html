@@ -49,7 +49,7 @@
                 <tbody>
                     {% for enrollment in enrollments %}
                         <tr>
-                            <td><a href="{% url 'courses:course_detail' pk=enrollment.course.pk %}">{{ enrollment.course.title }}</a></td>
+                            <td><a href="{% url 'course_detail' pk=enrollment.course.pk %}">{{ enrollment.course.title }}</a></td>
                             <td>{{ enrollment.course.teacher.full_name }}</td>
                             <td>{{ enrollment.enrollment_date|date:"d.m.Y" }}</td>
                             <td>
