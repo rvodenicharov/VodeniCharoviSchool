@@ -27,7 +27,7 @@ body {
 .school-logo {
     height: 70px;
     width: auto;
-    border-radius: 50%;
+    border-radius: 0;
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
